@@ -1,0 +1,126 @@
+# Deploy klatech to Azure Static Web Apps.
+#
+# The five-command gate from docs/RUNBOOK.md §1 runs first, in the same job, and
+# the deploy step only runs if all five are green. Nothing ships from a red tree.
+#
+# The build happens here rather than in Oryx (`skip_app_build: true`) for two
+# reasons: the gate has to run against the exact dist/ that gets uploaded, and
+# `npm run links` / `npm run test:e2e` read dist/, so it has to exist first.
+#
+# Setup, once, before the first run:
+#   1. Create the Static Web App in Azure (any region; the Free plan is enough).
+#      Choose "Other" as the deployment source so Azure does not generate its own
+#      workflow file that would compete with this one.
+#   2. Copy the deployment token (Azure portal -> the Static Web App -> Overview ->
+#      "Manage deployment token").
+#   3. Add it to this repo as the secret AZURE_STATIC_WEB_APPS_API_TOKEN
+#      (Settings -> Secrets and variables -> Actions).
+
+name: Deploy to Azure Static Web Apps
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: swa-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write # the deploy action comments the staging URL on the PR
+
+jobs:
+  build_and_deploy:
+    # A "closed" pull_request is handled by close_staging below, not here.
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+    name: Gate and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # package.json declares engines.node ">=22.12.0"; 22.x is the current
+          # LTS line that satisfies it. Bump here when that changes.
+          node-version: 22.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ---- the quality gate, in the order docs/RUNBOOK.md fixes ----------------
+      # build is first: test:e2e and links both read dist/, so running them before
+      # a build would test stale output.
+
+      - name: Build
+        run: npm run build
+
+      - name: Check (types + content schema)
+        run: npm run check
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests (incl. axe)
+        run: npm run test:e2e
+
+      - name: Link check
+        run: npm run links
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      # ---- deploy --------------------------------------------------------------
+
+      - name: Warn if the built site still points at localhost
+        run: |
+          if grep -rqF 'localhost:4321' dist; then
+            echo "::warning title=Site URL is still localhost::dist/ contains localhost:4321 — every canonical URL, RSS link and sitemap entry names localhost rather than the real domain. See docs/CONTRACTS.md §4: changing 'site' is one coordinated change across astro.config.mjs, src/lib/site.ts and tests/."
+          fi
+
+      # Azure reads staticwebapp.config.json from the root of what is uploaded.
+      # With skip_app_build the upload root is dist/, and dist/ is generated, so
+      # the file is staged here rather than committed inside it.
+      - name: Stage staticwebapp.config.json into dist/
+        run: cp staticwebapp.config.json dist/
+
+      - name: Deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          # Pre-built upload: app_location is the built output, output_location
+          # is empty, skip_app_build stops Oryx building it a second time.
+          app_location: dist
+          api_location: ''
+          output_location: ''
+          skip_app_build: true
+
+  close_staging:
+    # Closing or merging a PR tears down the staging environment it created.
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    name: Close staging environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: close

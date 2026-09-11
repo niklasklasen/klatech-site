@@ -302,15 +302,23 @@ Four documents in `docs/` govern the agents. **They are frozen** — agents may 
 
 ## 6. Known limitations
 
-- **KL1 — check before deploying.** Error pages carry a canonical URL and no `noindex`. That is harmless *only* while the host returns a real HTTP 404. Some static hosts serve the error document with 200 — on such a host `/404` becomes indexable and its canonical actively tells crawlers to fold it into the site. Verify your host returns 404 for an unknown path, and revisit if it doesn't.
+- **KL1 — check before deploying.** Error pages carry a canonical URL and no `noindex`. That is harmless *only* while the host returns a real HTTP 404. Some static hosts serve the error document with 200 — on such a host `/404` becomes indexable and its canonical actively tells crawlers to fold it into the site. Verify your host returns 404 for an unknown path, and revisit if it doesn't. `staticwebapp.config.json` is written to satisfy this: it sets `responseOverrides.404` to rewrite to `/404.html`, which serves that page while preserving the 404 status, and it deliberately declares **no** `navigationFallback` — a fallback would make every unknown path return 200 and turn KL1 from cosmetic into real. That is the intent, not yet a measurement: `curl -I https://<your-site>/nope-unknown-path` after the first deploy and confirm it says 404.
 - **KL2** — markdown tables are keyboard-scrollable only with JavaScript enabled. Low impact; no CSS-only fix exists.
 - **Single-post corpus** — post ordering, multi-post tag pages and draft exclusion are only lightly exercised until there is a second post.
 - `site` in `astro.config.mjs` is still `http://localhost:4321`. It becomes `https://klatech.se` at deploy time and not before — RSS, sitemap and every canonical URL are built from it, and QA's suite pins the localhost value, so changing it is one coordinated change across `astro.config.mjs`, `src/lib/site.ts` and `tests/`.
-- **Not deployed yet.** The target is a single Azure Static Web App serving all four
-  parts of the site from one `dist/`. Nothing about that has been set up: no
-  `staticwebapp.config.json`, no workflow, no resource. When you do it, KL1 above is
-  the first thing to check — confirm the app returns a real HTTP 404, not a 200, for
-  an unknown path.
+- **Not deployed yet — but the pipeline exists.** The target is a single Azure Static
+  Web App serving all four parts of the site from one `dist/`.
+  `.github/workflows/deploy.yml` runs the five-command gate and then uploads `dist/`
+  (pre-built: `skip_app_build: true`), and `staticwebapp.config.json` at the repo root
+  is staged into `dist/` by the workflow, because Azure reads it from the root of
+  whatever is uploaded. Three things are still outstanding, all yours:
+  1. Create the Static Web App in Azure, picking **Other** as the deployment source so
+     Azure does not generate a second, competing workflow file.
+  2. Put its deployment token in the repo secret `AZURE_STATIC_WEB_APPS_API_TOKEN`.
+  3. Decide the `site` URL question in the bullet above — until it is `https://klatech.se`,
+     a deploy ships canonicals, RSS links and a sitemap that all name localhost. The
+     workflow emits a GitHub warning annotation when it detects this rather than
+     blocking, so the first deploy can be a deliberate dry run.
 - **Contact links are live** as of 2026-09-09: email, GitHub and LinkedIn, defined once
   in `CONTACT_LINKS` in `src/lib/site.ts` and rendered in the footer and on `/about/`.
   Setting any `href` back to `null` renders that entry as plain text instead of a link —
