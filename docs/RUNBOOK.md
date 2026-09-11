@@ -12,7 +12,7 @@ The site has two blogs and they work differently:
 | Category | required, one of three | not a field |
 | Add a post | §2 Routes A–C below | §2A-personal below |
 
-Everything here assumes you are in `/Users/niklasklasen/Desktop/agent-blog`.
+Everything here assumes you are in the repository root (`klatech-site`).
 
 ---
 
