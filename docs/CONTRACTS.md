@@ -168,7 +168,8 @@ optional blocks conditionally — a `PostMeta` is assignable to it.
 | `src/components/Hero.astro` | `{ title: string; tagline: string }` | landing-page masthead; `<slot />` for the intro paragraph(s) |
 | `src/components/FeedSection.astro` | `{ heading: string; blurb?: string; posts: ArticleMeta[]; moreHref: string; moreLabel: string; empty?: string }` | one blog's latest posts on the landing page: `<h2>` heading, optional blurb, the cards, and a link to the blog's index. Renders `empty` (or a sensible default) when `posts` is empty |
 | `src/components/ContactLinks.astro` | `{ links: ContactLink[]; heading?: string }` | renders §7 `CONTACT_LINKS`. An entry whose `href` is `null` is **not yet configured**: render it as plain muted text, never as a link — the site must not ship a dead or invented contact link. Used on `/about/` and in the footer |
-| `src/components/SiteHeader.astro` | none | nav per §7 `NAV_LINKS`: Home, Agent Blog, Blog, Tags, About |
+| `src/components/SiteHeader.astro` | none | nav per §7 `NAV_LINKS`: Home, Agent Blog, Blog, Tags, About, plus `ThemeToggle` |
+| `src/components/ThemeToggle.astro` | none | the §5 colour-scheme control. A real `<button type="button">` with an accessible name that states what it does; rendered by `SiteHeader`, never called from `src/pages/` |
 | `src/components/SiteFooter.astro` | none | links both RSS feeds |
 
 ```ts
@@ -222,6 +223,43 @@ Declared in `src/styles/tokens.css` on `:root`. These names are fixed; QA assert
 
 Dark mode via `@media (prefers-color-scheme: dark)` redefining tokens only.
 Body must set an explicit background and color from tokens.
+
+> **Amendment 2026-09-11 (@lead) — the theme toggle.** The site gains a control that
+> lets a reader override the colour scheme. That needs a second mechanism alongside
+> the media query, so §5 is extended — not replaced. The media query stays the
+> **default**; an explicit choice overrides it. "Redefining tokens only" still holds:
+> the new selectors redefine the same tokens and nothing else, and no component may
+> branch on the colour scheme.
+>
+> The override is a `data-theme` attribute on the root element, with exactly three
+> states: absent (follow the OS), `"light"`, `"dark"`. Each colour token is therefore
+> declared in three places, and a palette written in only one of them is a defect:
+>
+> ```css
+> :root                                   { /* light — the base palette */ }
+> @media (prefers-color-scheme: dark) {
+>   :root:not([data-theme="light"])       { /* dark by OS, unless overridden to light */ }
+> }
+> :root[data-theme="dark"]                { /* dark by choice, in either OS scheme */ }
+> ```
+>
+> `color-scheme` follows the tokens in all three, so form controls and scrollbars
+> match. **Every rule elsewhere that keys off `prefers-color-scheme` must gain the
+> matching `[data-theme]` variant** — at the time of writing that is the Shiki
+> code-block swap at `src/styles/global.css:491`, and missing it means code blocks
+> render in the light palette inside a toggled-dark page, which is a contrast
+> failure, not a cosmetic one.
+>
+> State lives in `localStorage` under the key `klatech-theme`, values `light` or
+> `dark`; absent means follow the OS. It is applied by a small inline script in
+> `BaseLayout`'s `<head>`, before first paint — a deferred script would flash the
+> wrong theme. That script is the one place presentation may write to the DOM before
+> the body renders.
+>
+> The control is progressive enhancement: with JavaScript off it does nothing, so it
+> must not be visible then. Ship it hidden and let the script reveal it, the same way
+> the table-scroll enhancement in `BaseLayout` already works. A visible control that
+> cannot act is worse than no control.
 
 Additional tokens may be added (there are already derived roles such as
 `--color-accent-strong`). If the two blogs are distinguished by colour, that colour

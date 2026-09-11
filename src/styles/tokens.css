@@ -1,9 +1,21 @@
 /*
- * Design tokens — CONTRACTS §5.
+ * Design tokens — CONTRACTS §5, extended by the 2026-09-11 theme-toggle amendment.
  *
  * This is the ONLY file in the project allowed to contain literal colour values.
- * Everything else references these custom properties. Dark mode redefines tokens
- * and nothing else: no component may branch on the colour scheme itself.
+ * Everything else references these custom properties. No component may branch on
+ * the colour scheme itself — only this file does.
+ *
+ * Three states, per the amendment:
+ *   :root                                       -> light (the base palette)
+ *   OS dark media query, unless overridden      -> dark by OS
+ *   [data-theme="dark"] attribute override      -> dark by explicit choice, either OS scheme
+ * (the two dark selectors are written out in full further down, not here, so
+ * this comment cannot be mistaken by tooling for the real rule)
+ *
+ * The dark palette's literal values are declared exactly once, below, as
+ * `--dark-*` source-of-truth custom properties. Both dark selectors reference
+ * them with `var()` so the palette itself can never drift between the two —
+ * there is only one place to edit it.
  *
  * Contrast (verified, WCAG 2.1 non-linear formula):
  *   light  fg/bg 17.5:1   muted/bg 6.5:1   accent/bg 6.4:1   muted/surface 6.0:1
@@ -56,22 +68,55 @@
   --measure-wide: 76rem;   /* outer page container */
   --radius: 6px;
   --focus-ring: 2px;
+
+  /* ---- Dark palette, source of truth ----
+     Not a state on their own — referenced by both dark selectors below so the
+     palette is declared once and cannot drift between "dark by OS" and
+     "dark by choice". */
+  --dark-color-bg: #0f1216;
+  --dark-color-surface: #171b21;
+  --dark-color-fg: #e4e8ed;
+  --dark-color-muted: #99a3af;
+  --dark-color-accent: #6fb6f5;
+  --dark-color-border: #2c333d;
+  --dark-color-accent-strong: #9ccdf9;
+  --dark-color-accent-soft: #1a2735;
+  --dark-color-fg-inverse: #0f1216;
+  --dark-color-accent-alt: #a78bfa;
 }
 
+/* Dark by OS, unless the reader has explicitly chosen light via the toggle. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --color-bg: #0f1216;
-    --color-surface: #171b21;
-    --color-fg: #e4e8ed;
-    --color-muted: #99a3af;
-    --color-accent: #6fb6f5;
-    --color-border: #2c333d;
+    --color-bg: var(--dark-color-bg);
+    --color-surface: var(--dark-color-surface);
+    --color-fg: var(--dark-color-fg);
+    --color-muted: var(--dark-color-muted);
+    --color-accent: var(--dark-color-accent);
+    --color-border: var(--dark-color-border);
 
-    --color-accent-strong: #9ccdf9;
-    --color-accent-soft: #1a2735;
-    --color-fg-inverse: #0f1216;
-    --color-accent-alt: #a78bfa;
+    --color-accent-strong: var(--dark-color-accent-strong);
+    --color-accent-soft: var(--dark-color-accent-soft);
+    --color-fg-inverse: var(--dark-color-fg-inverse);
+    --color-accent-alt: var(--dark-color-accent-alt);
   }
+}
+
+/* Dark by explicit choice (the toggle), regardless of OS scheme. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: var(--dark-color-bg);
+  --color-surface: var(--dark-color-surface);
+  --color-fg: var(--dark-color-fg);
+  --color-muted: var(--dark-color-muted);
+  --color-accent: var(--dark-color-accent);
+  --color-border: var(--dark-color-border);
+
+  --color-accent-strong: var(--dark-color-accent-strong);
+  --color-accent-soft: var(--dark-color-accent-soft);
+  --color-fg-inverse: var(--dark-color-fg-inverse);
+  --color-accent-alt: var(--dark-color-accent-alt);
 }

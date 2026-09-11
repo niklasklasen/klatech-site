@@ -1,0 +1,62 @@
+---
+/**
+ * CONTRACTS §3 / §5 amendment (2026-09-11) — no props.
+ *
+ * The colour-scheme override control. Rendered by SiteHeader, never called
+ * from src/pages/. This component owns only markup and appearance; the state
+ * machine (localStorage read/write, `data-theme` on <html>, the click
+ * handler) lives in the inline head script in src/layouts/BaseLayout.astro —
+ * that script must run before first paint, so it cannot live inside a
+ * component that renders in <body>.
+ *
+ * Progressive enhancement: this button is hidden by default (see the
+ * `.theme-toggle` rule below) and is revealed only when BaseLayout's head
+ * script confirms JavaScript ran, by adding `theme-js` to <html> before the
+ * body renders. With JavaScript disabled, `.theme-toggle` never gains
+ * `display`, so the control never appears and never needs to act.
+ */
+---
+
+<button
+  type="button"
+  id="theme-toggle"
+  class="theme-toggle"
+  aria-label="Toggle light and dark theme"
+>
+  <span class="theme-toggle__icon" aria-hidden="true">◐</span>
+  <span class="theme-toggle__label">Theme</span>
+</button>
+
+<style>
+  .theme-toggle {
+    /* Progressive enhancement: stays display:none until BaseLayout's inline
+       head script (which runs before first paint) marks <html> as JS-capable. */
+    display: none;
+    align-items: center;
+    gap: 0.4em;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-surface);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  :global(html.theme-js) .theme-toggle {
+    display: inline-flex;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .theme-toggle__icon {
+    font-size: 1rem;
+  }
+</style>

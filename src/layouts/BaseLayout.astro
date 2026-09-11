@@ -34,6 +34,115 @@ const pageTitle = title.includes(SITE_TITLE) ? title : `${title} · ${SITE_TITLE
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script is:inline>
+      /**
+       * CONTRACTS §5 amendment (2026-09-11) — the theme toggle.
+       *
+       * The two meta tags above MUST stay the first thing in <head>, before
+       * this script: HTML requires the charset declaration to be serialized
+       * within the first 1024 bytes of the document, and this script (plus
+       * its non-ASCII prose) is bigger than that on its own.
+       *
+       * Inline and NOT deferred: this must run before first paint, or the
+       * page flashes the wrong theme while a deferred/module script waits for
+       * the parser. It has two jobs:
+       *
+       *  1. Apply the stored override (if any) to `data-theme` on <html>
+       *     before anything renders, and mark <html> as JS-capable so
+       *     ThemeToggle.astro's `display:none` lifts — the control is
+       *     progressive enhancement and must stay invisible without this.
+       *  2. Wire the click handler, via event delegation on `document`
+       *     (the button does not exist yet when this script runs, since it
+       *     is rendered later in <body> by SiteHeader/ThemeToggle).
+       *
+       * Every localStorage access is wrapped in try/catch: private-mode
+       * browsers and blocked site data can make the *accessor itself* throw,
+       * not just the call, and an uncaught exception here would break the
+       * page before the body renders. When storage is unavailable, the
+       * override is skipped entirely and the page stays in the OS scheme.
+       */
+      (function () {
+        var STORAGE_KEY = 'klatech-theme';
+        var root = document.documentElement;
+
+        function readStoredTheme() {
+          try {
+            var value = localStorage.getItem(STORAGE_KEY);
+            return value === 'light' || value === 'dark' ? value : null;
+          } catch (_err) {
+            return null;
+          }
+        }
+
+        function writeStoredTheme(theme) {
+          try {
+            localStorage.setItem(STORAGE_KEY, theme);
+          } catch (_err) {
+            // Storage unavailable (private mode, blocked site data, quota).
+            // The in-memory `data-theme` attribute still applies for this
+            // page view; it just will not persist. Do not throw.
+          }
+        }
+
+        function apply(theme) {
+          if (theme === 'light' || theme === 'dark') {
+            root.setAttribute('data-theme', theme);
+          } else {
+            root.removeAttribute('data-theme');
+          }
+        }
+
+        function effectiveIsDark() {
+          var current = root.getAttribute('data-theme');
+          if (current === 'dark') return true;
+          if (current === 'light') return false;
+          try {
+            return (
+              window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches
+            );
+          } catch (_err) {
+            return false;
+          }
+        }
+
+        function syncLabel(button) {
+          if (!button) return;
+          var next = effectiveIsDark() ? 'light' : 'dark';
+          button.setAttribute('aria-label', 'Switch to ' + next + ' theme');
+        }
+
+        // 1. Apply the stored override, if any, before first paint. Reveal
+        //    the control — JS is running, so the progressive-enhancement
+        //    control is now usable.
+        apply(readStoredTheme());
+        root.classList.add('theme-js');
+
+        // 2. Wire the toggle via delegation; #theme-toggle is not in the DOM
+        //    yet, but the click event bubbles to `document` once it exists.
+        document.addEventListener('click', function (event) {
+          var target = event.target;
+          var button =
+            target && typeof target.closest === 'function'
+              ? target.closest('#theme-toggle')
+              : null;
+          if (!button) return;
+          var next = effectiveIsDark() ? 'light' : 'dark';
+          apply(next);
+          writeStoredTheme(next);
+          syncLabel(button);
+        });
+
+        // Initial label sync, once the button exists. The reveal above does
+        // not wait on this — only the label text does, and DOMContentLoaded
+        // fires well before a reader can interact with the page.
+        document.addEventListener('DOMContentLoaded', function () {
+          syncLabel(document.getElementById('theme-toggle'));
+        });
+      })();
+    </script>
+
     <meta name="generator" content={Astro.generator} />
 
     <title>{pageTitle}</title>

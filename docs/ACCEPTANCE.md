@@ -98,3 +98,22 @@ These are additional to the per-role lists above, which still stand.
 ### content-lead
 - [ ] Personal-blog scaffolding is honestly marked as scaffolding — no invented
       biography, no fabricated post presented as the owner's writing
+
+---
+
+## Added 2026-09-11 — the theme toggle (CONTRACTS §5 amendment)
+
+### frontend-dev
+- [ ] Every colour token declared in all three states of the §5 amendment; a token
+      present in two of them is a defect
+- [ ] Every existing `prefers-color-scheme` rule has its `[data-theme]` counterpart —
+      grep for it and check each hit, starting with `src/styles/global.css:491`
+- [ ] Code blocks use the dark Shiki palette when dark is chosen **by the toggle on a
+      light-OS machine**, not only when dark is the OS setting
+- [ ] No flash of the wrong theme on load in either scheme, with a warm and a cold cache
+- [ ] The control is a `<button>` with an accessible name, a visible focus ring, and a
+      contrast-conformant hit area at 360px
+- [ ] With JavaScript disabled the control is not visible, and the page still renders in
+      the OS scheme
+- [ ] `localStorage` unavailable (private mode, blocked site data) degrades to OS scheme
+      rather than throwing — the head script must not break the page

@@ -1,5 +1,9 @@
 ---
-/** CONTRACTS §3 — no props. Nav per §7: Home, Agent Blog, Blog, Tags, About. */
+/**
+ * CONTRACTS §3 — no props. Nav per §7: Home, Agent Blog, Blog, Tags, About,
+ * plus ThemeToggle (§5 amendment 2026-09-11).
+ */
+import ThemeToggle from './ThemeToggle.astro';
 import { NAV_LINKS, SITE_TITLE } from './site';
 
 const normalise = (path: string) => path.replace(/\/+$/, '') || '/';
@@ -37,6 +41,8 @@ function isCurrent(href: string): boolean {
         }
       </ul>
     </nav>
+
+    <ThemeToggle />
   </div>
 </header>
 

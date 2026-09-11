@@ -487,15 +487,26 @@ hr {
 
 /* Shiki dual theme: Astro emits the light palette inline and the dark palette
    as --shiki-dark* custom properties. !important is required because it must
-   beat a style attribute. Scoped to prefers-color-scheme to match tokens.css:54. */
+   beat a style attribute. Scoped to match tokens.css's three theme states —
+   dark by OS (unless overridden to light) and dark by explicit choice via the
+   toggle. Missing either half means a reader gets the light Shiki palette
+   inside a dark page, which is a contrast failure (WCAG 1.4.3), not cosmetic. */
 @media (prefers-color-scheme: dark) {
-  .prose pre.astro-code {
+  :root:not([data-theme="light"]) .prose pre.astro-code {
     background-color: var(--shiki-dark-bg) !important;
   }
-  .prose pre.astro-code,
-  .prose pre.astro-code span {
+  :root:not([data-theme="light"]) .prose pre.astro-code,
+  :root:not([data-theme="light"]) .prose pre.astro-code span {
     color: var(--shiki-dark) !important;
   }
+}
+
+:root[data-theme="dark"] .prose pre.astro-code {
+  background-color: var(--shiki-dark-bg) !important;
+}
+:root[data-theme="dark"] .prose pre.astro-code,
+:root[data-theme="dark"] .prose pre.astro-code span {
+  color: var(--shiki-dark) !important;
 }
 
 /* ---- tables ---- */
