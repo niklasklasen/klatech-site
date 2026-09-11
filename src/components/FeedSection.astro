@@ -1,0 +1,95 @@
+---
+/**
+ * CONTRACTS §3 — props:
+ *   { heading: string; blurb?: string; posts: ArticleMeta[]; moreHref: string;
+ *     moreLabel: string; empty?: string }
+ *
+ * One blog's latest posts on the landing page. Root element carries the
+ * `.feed-section` class, which `global.css` uses to lay two of these out
+ * side by side from 768px up — no wrapper markup required in the page.
+ */
+import PostCard from './PostCard.astro';
+import type { ArticleMeta } from './types';
+
+interface Props {
+  heading: string;
+  blurb?: string;
+  posts: ArticleMeta[];
+  moreHref: string;
+  moreLabel: string;
+  empty?: string;
+}
+
+const { heading, blurb, posts, moreHref, moreLabel, empty = 'Nothing here yet.' } = Astro.props;
+
+const headingId = `feed-${heading
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')}-heading`;
+---
+
+<section class="feed-section" aria-labelledby={headingId}>
+  <h2 class="feed-section__heading" id={headingId}>{heading}</h2>
+  {blurb && <p class="feed-section__blurb">{blurb}</p>}
+
+  {
+    posts.length > 0 ? (
+      <div class="feed-section__list">
+        {posts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </div>
+    ) : (
+      <p class="feed-section__empty">{empty}</p>
+    )
+  }
+
+  <a class="feed-section__more" href={moreHref}>{moreLabel}</a>
+</section>
+
+<style>
+  .feed-section {
+    min-width: 0;
+  }
+
+  .feed-section__heading {
+    margin: 0;
+  }
+
+  .feed-section__blurb {
+    margin: var(--space-2) 0 0;
+    max-width: var(--measure);
+    color: var(--color-muted);
+  }
+
+  .feed-section__list {
+    margin-block-start: var(--space-2);
+  }
+
+  /* First card's own top border is redundant right under the heading. */
+  .feed-section__list > :global(.post-card:first-child) {
+    border-top: 0;
+    padding-block-start: var(--space-3);
+  }
+
+  .feed-section__empty {
+    margin: var(--space-4) 0 0;
+    padding: var(--space-4);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-muted);
+    font-size: 0.9375rem;
+  }
+
+  .feed-section__more {
+    display: inline-block;
+    margin-block-start: var(--space-4);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-underline-offset: 0.18em;
+  }
+
+  .feed-section__more::after {
+    content: " \2192";
+  }
+</style>

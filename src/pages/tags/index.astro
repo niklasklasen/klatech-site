@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagPill from '../../components/TagPill.astro';
+import { collectTags, getAllMetas } from '../../lib/posts';
+import { SITE_TITLE } from '../../lib/site';
+
+const posts = await getAllMetas();
+const tags = collectTags(posts);
+
+const title = `Tags | ${SITE_TITLE}`;
+const description =
+  'Every topic covered across both blogs, from Azure network security to prompt injection, with the number of posts filed under each.';
+---
+
+<BaseLayout title={title} description={description} canonicalPath="/tags/">
+  <h1>Tags</h1>
+  <ul>
+    {
+      tags.map(({ tag, count }) => (
+        <li>
+          <TagPill tag={tag} href={`/tags/${tag}/`} />
+          <span>{count} {count === 1 ? 'post' : 'posts'}</span>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>

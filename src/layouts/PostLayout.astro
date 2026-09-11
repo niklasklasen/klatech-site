@@ -1,0 +1,355 @@
+---
+/**
+ * CONTRACTS §3 — props: { post: ArticleMeta; headings: MarkdownHeading[] }
+ *
+ * Serves both blogs. Title block, meta line, table of contents, the post
+ * body via <slot />, and the (conditional) Sources section. Receives
+ * everything as props and never reads the content collection API itself.
+ * `post.href` is used verbatim — no file here builds a URL from a slug.
+ */
+import type { MarkdownHeading } from 'astro';
+import TagPill from '../components/TagPill.astro';
+import { categoryLabel, isoDate } from '../components/site';
+import type { ArticleMeta } from '../components/types';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  post: ArticleMeta;
+  headings: MarkdownHeading[];
+}
+
+const { post, headings } = Astro.props;
+
+// h1 is the post title; h4 and deeper are too granular to navigate by.
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const sources = post.sources ?? [];
+---
+
+<BaseLayout
+  title={post.title}
+  description={post.description}
+  canonicalPath={post.href}
+  ogType="article"
+>
+  <article class="post">
+    <header class="post__header">
+      {post.category && <p class="post__kicker">{categoryLabel(post.category)}</p>}
+      <h1 class="post__title">{post.title}</h1>
+      <p class="post__standfirst">{post.description}</p>
+
+      <dl class="post__meta">
+        <div class="post__meta-item">
+          <dt>Published</dt>
+          <dd><time datetime={isoDate(post.pubDate)}>{isoDate(post.pubDate)}</time></dd>
+        </div>
+        {
+          post.updatedDate && (
+            <div class="post__meta-item">
+              <dt>Updated</dt>
+              <dd>
+                <time datetime={isoDate(post.updatedDate)}>{isoDate(post.updatedDate)}</time>
+              </dd>
+            </div>
+          )
+        }
+        {
+          post.verifiedDate && (
+            <div class="post__meta-item">
+              <dt>Verified</dt>
+              <dd>
+                <time datetime={isoDate(post.verifiedDate)}>{isoDate(post.verifiedDate)}</time>
+              </dd>
+            </div>
+          )
+        }
+        <div class="post__meta-item">
+          <dt>Reading time</dt>
+          <dd>{post.readingTime} min</dd>
+        </div>
+        <div class="post__meta-item">
+          <dt>Author</dt>
+          <dd>{post.author}</dd>
+        </div>
+      </dl>
+
+      {
+        post.verifiedDate && (
+          <p class="post__verified-note">
+            Technically accurate as of{' '}
+            <time datetime={isoDate(post.verifiedDate)}>{isoDate(post.verifiedDate)}</time>. Cloud
+            platforms change — check the sources before acting on this.
+          </p>
+        )
+      }
+
+      {
+        post.originalUrl && (
+          <p class="post__original-note">
+            Originally published at <a href={post.originalUrl}>{post.originalUrl}</a>.
+          </p>
+        )
+      }
+
+      {
+        post.tags.length > 0 && (
+          <ul class="post__tags">
+            {post.tags.map((tag) => (
+              <li>
+                <TagPill tag={tag} href={`/tags/${tag}/`} />
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    <div class:list={['post__body', { 'post__body--with-toc': toc.length > 0 }]}>
+      {
+        toc.length > 0 && (
+          <nav class="toc" aria-labelledby="toc-heading">
+            <h2 class="toc__heading" id="toc-heading">
+              On this page
+            </h2>
+            <ol class="toc__list">
+              {toc.map((heading) => (
+                <li class:list={['toc__item', `toc__item--depth-${heading.depth}`]}>
+                  <a class="toc__link" href={`#${heading.slug}`}>
+                    {heading.text}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+
+      <div class="prose">
+        <slot />
+      </div>
+    </div>
+
+    {
+      sources.length > 0 && (
+        <section class="sources" aria-labelledby="sources-heading">
+          <h2 class="sources__heading" id="sources-heading">
+            Sources
+          </h2>
+          <ol class="sources__list">
+            {sources.map((source) => (
+              <li class="sources__item">
+                <a class="sources__link" href={source.url}>
+                  {source.title}
+                </a>
+                <span class="sources__detail">
+                  {source.publisher} &middot; accessed{' '}
+                  <time datetime={isoDate(source.accessed)}>{isoDate(source.accessed)}</time>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .post__header {
+    max-width: var(--measure);
+    padding-block-end: var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .post__kicker {
+    margin: 0 0 var(--space-2);
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* 70-character titles are in scope: wrap, never truncate or overflow. */
+  .post__title {
+    margin: 0;
+    font-size: clamp(1.75rem, 1.35rem + 1.7vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+  }
+
+  .post__standfirst {
+    margin: var(--space-3) 0 0;
+    color: var(--color-muted);
+    font-size: 1.0625rem;
+  }
+
+  .post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .post__meta-item {
+    display: flex;
+    gap: 0.4em;
+  }
+
+  .post__meta dt {
+    color: var(--color-muted);
+  }
+
+  .post__meta dt::after {
+    content: ":";
+  }
+
+  .post__meta dd {
+    margin: 0;
+    color: var(--color-fg);
+  }
+
+  .post__verified-note {
+    margin: var(--space-4) 0 0;
+    padding-inline-start: var(--space-3);
+    border-inline-start: 3px solid var(--color-accent);
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+
+  .post__original-note {
+    margin: var(--space-4) 0 0;
+    padding-inline-start: var(--space-3);
+    border-inline-start: 3px solid var(--color-accent-alt);
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    overflow-wrap: anywhere;
+  }
+
+  .post__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .post__body {
+    display: grid;
+    /* minmax(0, 1fr), not the implicit `auto` track: an auto track is sized by
+       the min-content of its item, and a wide code block would then push the
+       whole column — ToC and all — past the viewport edge. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    margin-block-start: var(--space-5);
+  }
+
+  /* Wide screens: the contents list becomes a sticky rail beside the body. */
+  @media (min-width: 64rem) {
+    .post__body--with-toc {
+      grid-template-columns: minmax(0, 1fr) 15rem;
+      gap: var(--space-6);
+      align-items: start;
+    }
+
+    .post__body--with-toc > .toc {
+      position: sticky;
+      top: var(--space-4);
+      order: 2;
+      max-height: calc(100vh - var(--space-6));
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      padding-block-start: var(--space-1);
+      border-top: 0;
+    }
+
+    .post__body--with-toc > .prose {
+      order: 1;
+    }
+  }
+
+  .toc {
+    min-width: 0;
+    padding-block-start: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .toc__heading {
+    margin: 0 0 var(--space-2);
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .toc__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+
+  .toc__item + .toc__item {
+    margin-block-start: var(--space-2);
+  }
+
+  .toc__item--depth-3 {
+    padding-inline-start: var(--space-3);
+  }
+
+  .toc__link {
+    color: var(--color-muted);
+    text-decoration: none;
+    overflow-wrap: break-word;
+  }
+
+  .toc__link:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .sources {
+    max-width: var(--measure);
+    margin-block-start: var(--space-6);
+    padding-block-start: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .sources__heading {
+    margin: 0 0 var(--space-3);
+    font-size: 1.125rem;
+    font-weight: 650;
+  }
+
+  .sources__list {
+    margin: 0;
+    padding-inline-start: 1.4em;
+  }
+
+  .sources__item + .sources__item {
+    margin-block-start: var(--space-3);
+  }
+
+  .sources__item::marker {
+    color: var(--color-muted);
+  }
+
+  .sources__link {
+    /* Citation URLs and titles are long; break rather than widen the page. */
+    overflow-wrap: anywhere;
+  }
+
+  .sources__detail {
+    display: block;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+</style>

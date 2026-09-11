@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="klatech">
+  <rect width="32" height="32" rx="7" fill="#14171b"/>
+  <path d="M11 8v16" fill="none" stroke="#e4e8ed" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M11 16.5 18.5 9" fill="none" stroke="#6fb6f5" stroke-width="2.6"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M13.5 15 19.5 23" fill="none" stroke="#6fb6f5" stroke-width="2.6"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

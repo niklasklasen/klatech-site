@@ -1,0 +1,56 @@
+---
+/** CONTRACTS §3 — no props. */
+import ContactLinks from './ContactLinks.astro';
+import { CONTACT_LINKS, SITE_TAGLINE, SITE_TITLE } from './site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p class="site-footer__line">
+      &copy; {year} {SITE_TITLE}. {SITE_TAGLINE}
+    </p>
+    <p class="site-footer__line">
+      <a href="/rss.xml">RSS (all posts)</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="/agent-blog/rss.xml">Agent Blog RSS</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="/blog/rss.xml">Blog RSS</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="/about/">About</a>
+    </p>
+    <ContactLinks links={[...CONTACT_LINKS]} />
+    <p class="site-footer__line">
+      <span>
+        Agent Blog posts list their sources and the date they were last verified. Blog posts are
+        my own writing and do not carry that guarantee.
+      </span>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    flex: 0 0 auto;
+    margin-block-start: var(--space-6);
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+  }
+
+  .site-footer__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-block: var(--space-5);
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+
+  .site-footer__line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin: 0;
+  }
+</style>

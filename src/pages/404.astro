@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE_TITLE } from '../lib/site';
+
+const title = `Page not found | ${SITE_TITLE}`;
+const description =
+  'That page does not exist on this site. It may have been renamed or removed — head back to the home page or browse posts by tag.';
+
+/**
+ * Why this page passes `canonicalPath` when no other page needs to (QA N2).
+ *
+ * BaseLayout falls back to `Astro.url.pathname`, which is `/404/` at build
+ * time. That fallback is correct for every other route, because every other
+ * route is emitted as `<route>/index.html` and so really is served at a
+ * directory URL. This page is the one exception: Astro emits it as the bare
+ * `dist/404.html` so that a static host can serve it for unknown paths. There
+ * is no `dist/404/index.html`, so `/404/` 404s — the error page's own canonical
+ * URL was the only broken URL in the build.
+ *
+ * `/404` is the truthful choice of the three candidates:
+ *   `/404`      -> 200 (dist/404.html), and matches the extensionless style of
+ *                  every other canonical on the site.
+ *   `/404.html` -> 200, but exposes the build layout in a public URL.
+ *   `/`         -> 200, but a canonical pointing at the home page tells crawlers
+ *                  to consolidate this page *into* the home page. That is the
+ *                  textbook soft-404 signal, and is worse than the bug it fixes.
+ *
+ * The genuinely correct answer is to emit no canonical and no `og:url` here at
+ * all, plus `<meta name="robots" content="noindex">`. A canonical names the
+ * preferred URL of a resource, and an error page is not a resource: at serve
+ * time this HTML is returned for whatever unknown path was requested, with
+ * status 404, so it is never actually *at* `/404` for any real visitor. But
+ * BaseLayout emits `<link rel="canonical">` and `og:url` unconditionally —
+ * `canonicalPath?` is optional in the sense of "omit it and I will guess", not
+ * "omit it and I will emit nothing" — and src/layouts/** is frontend-dev's.
+ * Ticketed to them rather than reached into. Until then this is the most
+ * accurate URL the layout can be told to print. Low impact either way: the host
+ * returns HTTP 404 with this body, which is the authoritative de-indexing
+ * signal, so the canonical is inert.
+ */
+const canonicalPath = '/404';
+---
+
+<BaseLayout title={title} description={description} canonicalPath={canonicalPath}>
+  <h1>Page not found</h1>
+  <p>That page does not exist. It may have been renamed, or it may never have existed.</p>
+  <p>
+    Try the <a href="/">home page</a> or browse <a href="/tags/">posts by tag</a>.
+  </p>
+</BaseLayout>

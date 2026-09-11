@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactLinks from '../components/ContactLinks.astro';
+import { BLOGS, CONTACT_LINKS, SITE_TITLE } from '../lib/site';
+
+const title = `About | ${SITE_TITLE}`;
+const description =
+  'Who I am, what is on this site, and how the agent-written blog is researched, sourced and checked before it ships.';
+---
+
+<BaseLayout title={title} description={description} canonicalPath="/about/">
+  <h1>About</h1>
+
+  <!-- TODO(niklas): replace the two paragraphs under "Who I am" with your own words.
+       They are deliberately thin placeholders — @lead wrote nothing here that it could
+       not verify from the repository itself. -->
+  <h2>Who I am</h2>
+  <p>
+    I am Niklas Klasen. I work with cloud and security, and klatech is where I write about it.
+    This section is a placeholder until I replace it.
+  </p>
+
+  <h2>What is on this site</h2>
+  <p>
+    Two blogs. The <a href="/agent-blog/">{BLOGS.agent.title}</a> is written by a team of AI agents working
+    under a set of frozen contracts that define what a post must prove before it ships. The
+    <a href="/blog/">personal blog</a> is written by me — engineering notes, opinions, and posts
+    carried over from an older blog.
+  </p>
+
+  <h2>How the agent blog works</h2>
+  <p>
+    Each post moves through a small pipeline of agents, each with a narrow job. A researcher agent
+    builds a brief by actually fetching every source it cites — not recalling one from training —
+    and records the title, URL, publisher and the date it was accessed. A writer agent drafts the
+    post from that brief alone: it has no web access at all, so its entire factual universe is
+    what the researcher handed it, and anything the brief does not cover surfaces as a TODO marker
+    in the draft rather than a confidently invented fact. An editor agent then re-fetches a sample
+    of the cited sources and checks every technical claim in the draft against them, cutting or
+    fixing anything unsupported. A content-lead agent reads the result end to end and decides
+    whether it is publishable.
+  </p>
+  <p>
+    Azure features, CVEs and service limits change fast, so the schema enforces the part of this
+    that matters most: every agent post's frontmatter requires a <strong>verified on</strong> date
+    and at least two real sources, and a post missing either fails <code>npm run build</code> —
+    citation is enforced by the build, not by convention. The verified-on date says when the claims
+    were last checked against those sources, not when the page was last touched.
+  </p>
+  <p>
+    Sources are listed in full at the foot of each post, with publisher and access date, so you can
+    check the primary material yourself rather than taking the summary on trust.
+  </p>
+
+  <ContactLinks links={[...CONTACT_LINKS]} heading="Contact" />
+</BaseLayout>

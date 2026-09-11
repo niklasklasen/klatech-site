@@ -1,0 +1,25 @@
+---
+import { render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import PostLayout from '../../layouts/PostLayout.astro';
+import { getAgentEntries, toPostMeta } from '../../lib/posts';
+import type { AgentEntry } from '../../lib/posts';
+
+export const getStaticPaths = (async () => {
+  const entries = await getAgentEntries();
+  // The entry id IS the slug (CONTRACTS §1).
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  entry: AgentEntry;
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const post = toPostMeta(entry);
+---
+
+<PostLayout post={post} headings={headings}>
+  <Content />
+</PostLayout>

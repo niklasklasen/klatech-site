@@ -1,0 +1,34 @@
+{
+  "name": "agent-blog",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "links": "node tests/server.mjs & SRV=$!; sleep 1; linkinator http://127.0.0.1:4321/ --recurse --skip '^https?://(?!127\\.0\\.0\\.1:4321)'; STATUS=$?; kill $SRV 2>/dev/null; exit $STATUS"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^7.2.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
+    "@types/js-yaml": "^4.0.9",
+    "fast-xml-parser": "^5.11.0",
+    "js-yaml": "^4.3.1",
+    "linkinator": "^8.0.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

@@ -1,0 +1,75 @@
+---
+/**
+ * CONTRACTS §3 — props: { links: ContactLink[]; heading?: string }
+ *
+ * Contact/profile links (email, GitHub, LinkedIn, ...). An entry with
+ * `href: null` is not configured yet and renders as plain, muted text —
+ * never a link, never a guessed address, never `href="#"`. The component
+ * branches only on `href`; the label carries no meaning about its state, so
+ * filling in a real address later is a one-line data change, no template edit.
+ */
+import type { ContactLink } from './types';
+
+interface Props {
+  links: ContactLink[];
+  heading?: string;
+}
+
+const { links, heading } = Astro.props;
+---
+
+{
+  links.length > 0 && (
+    <div class="contact-links">
+      {heading && <h2 class="contact-links__heading">{heading}</h2>}
+      <ul class="contact-links__list">
+        {links.map((link) =>
+          link.href ? (
+            <li>
+              <a class="contact-links__link" href={link.href}>
+                {link.label}
+              </a>
+            </li>
+          ) : (
+            <li>
+              <span class="contact-links__pending" title="Not set up yet">
+                {link.label}
+              </span>
+            </li>
+          ),
+        )}
+      </ul>
+    </div>
+  )
+}
+
+<style>
+  .contact-links__heading {
+    margin: 0 0 var(--space-2);
+  }
+
+  .contact-links__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .contact-links__link {
+    text-underline-offset: 0.18em;
+  }
+
+  /* Not yet configured: reads as inert text, not as a broken or dead link.
+     Contrast still holds at >= 4.5:1 in both palettes (same var as body muted). */
+  .contact-links__pending {
+    color: var(--color-muted);
+    cursor: default;
+  }
+
+  .contact-links__pending::after {
+    content: " (not set up yet)";
+    font-size: 0.85em;
+  }
+</style>

@@ -1,0 +1,25 @@
+---
+import { render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import PostLayout from '../../layouts/PostLayout.astro';
+import { getPersonalEntries, toArticleMeta } from '../../lib/posts';
+import type { PersonalEntry } from '../../lib/posts';
+
+export const getStaticPaths = (async () => {
+  const entries = await getPersonalEntries();
+  // The entry id IS the slug (CONTRACTS §1).
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  entry: PersonalEntry;
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const post = toArticleMeta(entry, 'personal');
+---
+
+<PostLayout post={post} headings={headings}>
+  <Content />
+</PostLayout>

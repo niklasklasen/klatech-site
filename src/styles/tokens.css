@@ -1,0 +1,77 @@
+/*
+ * Design tokens — CONTRACTS §5.
+ *
+ * This is the ONLY file in the project allowed to contain literal colour values.
+ * Everything else references these custom properties. Dark mode redefines tokens
+ * and nothing else: no component may branch on the colour scheme itself.
+ *
+ * Contrast (verified, WCAG 2.1 non-linear formula):
+ *   light  fg/bg 17.5:1   muted/bg 6.5:1   accent/bg 6.4:1   muted/surface 6.0:1
+ *          accent-alt/bg 6.9:1   accent-alt/surface 6.4:1
+ *   dark   fg/bg 15.3:1   muted/bg 7.3:1   accent/bg 8.7:1   muted/surface 6.8:1
+ *          accent-alt/bg 6.9:1   accent-alt/surface 6.4:1
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Colour: light (default) ---- */
+  --color-bg: #fcfcfb;
+  --color-surface: #f3f3f0;
+  --color-fg: #14171b;
+  --color-muted: #565d66;
+  --color-accent: #0b5fa5;
+  --color-border: #d7d7d0;
+
+  /* Derived colour roles (still tokens — never hard-code these downstream) */
+  --color-accent-strong: #084a80;   /* hover/active link */
+  --color-accent-soft: #dfebf7;     /* tinted fill: selection, pill hover */
+  --color-fg-inverse: #fcfcfb;
+
+  /* Second accent: distinguishes the personal blog from the agent blog
+     (e.g. the PostCard blog badge). Never the only signal — badge text
+     always names the blog too. */
+  --color-accent-alt: #6d28d9;
+
+  /* ---- Type ---- */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", "Roboto Mono", monospace;
+
+  --leading-body: 1.7;
+  --leading-tight: 1.25;
+
+  /* ---- Space ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1.25rem;
+  --space-5: 2rem;
+  --space-6: 3.25rem;
+
+  /* ---- Measure & shape ---- */
+  --measure: 68ch;         /* body copy reading width */
+  --measure-figure: 54rem; /* code blocks and tables — wider than the text */
+  --measure-wide: 76rem;   /* outer page container */
+  --radius: 6px;
+  --focus-ring: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-bg: #0f1216;
+    --color-surface: #171b21;
+    --color-fg: #e4e8ed;
+    --color-muted: #99a3af;
+    --color-accent: #6fb6f5;
+    --color-border: #2c333d;
+
+    --color-accent-strong: #9ccdf9;
+    --color-accent-soft: #1a2735;
+    --color-fg-inverse: #0f1216;
+    --color-accent-alt: #a78bfa;
+  }
+}

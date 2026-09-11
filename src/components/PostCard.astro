@@ -1,0 +1,151 @@
+---
+/** CONTRACTS §3 — props: { post: ArticleMeta; showBlog?: boolean }. List/index item. */
+import TagPill from './TagPill.astro';
+import { blogLabel, categoryLabel, isoDate } from './site';
+import type { ArticleMeta } from './types';
+
+interface Props {
+  post: ArticleMeta;
+  showBlog?: boolean;
+}
+
+const { post, showBlog = false } = Astro.props;
+---
+
+<article class="post-card">
+  {
+    (showBlog || post.category) && (
+      <p class="post-card__kicker">
+        {showBlog && (
+          <span class:list={['post-card__blog-badge', `post-card__blog-badge--${post.blog}`]}>
+            {blogLabel(post.blog)}
+          </span>
+        )}
+        {post.category && <span>{categoryLabel(post.category)}</span>}
+      </p>
+    )
+  }
+
+  <h2 class="post-card__title">
+    <a href={post.href}>{post.title}</a>
+  </h2>
+
+  <p class="post-card__description">{post.description}</p>
+
+  <p class="post-card__meta">
+    <time datetime={isoDate(post.pubDate)}>{isoDate(post.pubDate)}</time>
+    <span aria-hidden="true">&middot;</span>
+    <span>{post.readingTime} min read</span>
+    {
+      post.updatedDate && (
+        <>
+          <span aria-hidden="true">&middot;</span>
+          <span>
+            Updated <time datetime={isoDate(post.updatedDate)}>{isoDate(post.updatedDate)}</time>
+          </span>
+        </>
+      )
+    }
+  </p>
+
+  {
+    post.tags.length > 0 && (
+      <ul class="post-card__tags">
+        {post.tags.map((tag) => (
+          <li>
+            <TagPill tag={tag} href={`/tags/${tag}/`} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</article>
+
+<style>
+  .post-card {
+    max-width: var(--measure);
+    padding-block: var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .post-card__kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-1);
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .post-card__blog-badge {
+    display: inline-block;
+    padding: 0.15em 0.5em;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background-color: var(--color-surface);
+    color: var(--color-muted);
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* Colour distinguishes the two blogs' badges, but the label text is what
+     actually carries the distinction (CONTRACTS §5: never colour alone). */
+  .post-card__blog-badge--agent {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .post-card__blog-badge--personal {
+    border-color: var(--color-accent-alt);
+    color: var(--color-accent-alt);
+  }
+
+  .post-card__title {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 650;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+
+  .post-card__title a {
+    color: var(--color-fg);
+    text-decoration: none;
+  }
+
+  .post-card__title a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .post-card__description {
+    margin: var(--space-2) 0 0;
+    color: var(--color-muted);
+    font-size: 1rem;
+  }
+
+  .post-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin: var(--space-3) 0 0;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .post-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+</style>

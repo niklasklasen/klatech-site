@@ -1,0 +1,171 @@
+---
+/**
+ * CONTRACTS §3 — props:
+ *   { title: string; description: string; canonicalPath?: string; ogType?: string }
+ *
+ * The full document shell: head/meta, skip link, header, <main>, footer.
+ * The presentation layer never reads the content collection API; every value
+ * on this page arrived as a prop from src/pages/.
+ */
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { SITE, SITE_TAGLINE, SITE_TITLE } from '../components/site';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  ogType?: string;
+}
+
+const { title, description, canonicalPath, ogType = 'website' } = Astro.props;
+
+// `Astro.site` is set in astro.config.mjs (backend-dev). Fall back to the
+// current origin so the layout still renders if it is not configured yet.
+const base = Astro.site ?? new URL(Astro.url.origin);
+const canonical = new URL(canonicalPath ?? Astro.url.pathname, base);
+
+// Pages may pass a title that already carries the site name; don't double it.
+const pageTitle = title.includes(SITE_TITLE) ? title : `${title} · ${SITE_TITLE}`;
+---
+
+<html lang={SITE.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${SITE_TITLE} — ${SITE_TAGLINE}`}
+      href="/rss.xml"
+    />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:site_name" content={SITE_TITLE} />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <SiteHeader />
+
+    <main id="main" class="page-main container">
+      <slot />
+    </main>
+
+    <SiteFooter />
+
+    <script>
+      // Progressive enhancement: a scrollable region with no focusable content
+      // is unreachable by keyboard (and an axe `scrollable-region-focusable`
+      // violation). Code blocks and wide tables only become tab stops when
+      // they actually overflow, so no page collects useless tab stops.
+      const prose = document.querySelector('.prose');
+      if (prose) {
+        /** Trim and collapse whitespace; '' when there is nothing usable. */
+        const clean = (value: string | null | undefined) =>
+          (value ?? '').replace(/\s+/g, ' ').trim();
+
+        /**
+         * Text of the heading this element sits under, so a region can be
+         * named after the section it belongs to. Walks up to the direct child
+         * of `.prose`, then back through previous siblings.
+         */
+        const sectionHeading = (el: Element): string => {
+          let node: Element | null = el;
+          while (node && node.parentElement !== prose) node = node.parentElement;
+          for (let sib = node?.previousElementSibling; sib; sib = sib.previousElementSibling) {
+            if (/^H[1-6]$/.test(sib.tagName)) return clean(sib.textContent);
+          }
+          return '';
+        };
+
+        for (const table of prose.querySelectorAll('table')) {
+          const parent = table.parentElement;
+          if (parent && parent.classList.contains('table-scroll')) continue;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'table-scroll';
+          const caption = clean(table.querySelector('caption')?.textContent);
+          const heading = sectionHeading(table);
+          // A caption names the table outright; otherwise borrow the section
+          // heading. `dedupe` below numbers whatever is still ambiguous.
+          wrapper.dataset.label = caption || (heading && `Table: ${heading}`) || 'Table';
+          table.replaceWith(wrapper);
+          wrapper.append(table);
+        }
+
+        for (const pre of prose.querySelectorAll<HTMLElement>('pre')) {
+          const heading = sectionHeading(pre);
+          pre.dataset.label = heading ? `Code block: ${heading}` : 'Code block';
+        }
+
+        /**
+         * axe `landmark-unique`: two regions must not share an accessible
+         * name. Anything still duplicated after the caption/heading pass gets
+         * numbered — "Table 1", "Table 2" — so each is distinguishable.
+         */
+        const dedupe = () => {
+          const byLabel = new Map<string, HTMLElement[]>();
+          for (const el of prose.querySelectorAll<HTMLElement>('pre, .table-scroll')) {
+            const label = el.dataset.label || 'Region';
+            byLabel.set(label, [...(byLabel.get(label) ?? []), el]);
+          }
+          for (const [label, group] of byLabel) {
+            if (group.length < 2) continue;
+            group.forEach((el, i) => {
+              el.dataset.label = `${label} ${i + 1}`;
+            });
+          }
+        };
+
+        dedupe();
+
+        const sync = () => {
+          const regions = document.querySelectorAll<HTMLElement>(
+            '.prose pre, .prose .table-scroll',
+          );
+          for (const el of regions) {
+            if (el.scrollWidth > el.clientWidth + 1) {
+              el.setAttribute('tabindex', '0');
+              el.setAttribute('role', 'region');
+              el.setAttribute('aria-label', el.dataset.label || 'Scrollable region');
+            } else {
+              el.removeAttribute('tabindex');
+              el.removeAttribute('role');
+              el.removeAttribute('aria-label');
+            }
+          }
+        };
+
+        sync();
+        document.fonts?.ready.then(sync);
+
+        let frame = 0;
+        window.addEventListener(
+          'resize',
+          () => {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(sync);
+          },
+          { passive: true },
+        );
+      }
+    </script>
+  </body>
+</html>

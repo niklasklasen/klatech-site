@@ -1,0 +1,58 @@
+---
+/**
+ * CONTRACTS §3 — props: { title: string; tagline: string }, <slot /> for the
+ * intro paragraph(s). The landing masthead — carries the page's one <h1>.
+ */
+interface Props {
+  title: string;
+  tagline: string;
+}
+
+const { title, tagline } = Astro.props;
+---
+
+<header class="hero">
+  <h1 class="hero__title">{title}</h1>
+  <p class="hero__tagline">{tagline}</p>
+  <div class="hero__intro">
+    <slot />
+  </div>
+</header>
+
+<style>
+  .hero {
+    max-width: var(--measure);
+    padding-block-end: var(--space-5);
+    margin-block-end: var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .hero__title {
+    margin: 0;
+    font-size: clamp(2.25rem, 1.7rem + 2.4vw, 3.25rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .hero__tagline {
+    margin: var(--space-3) 0 0;
+    color: var(--color-muted);
+    font-size: 1.1875rem;
+    line-height: var(--leading-tight);
+  }
+
+  .hero__intro {
+    margin-block-start: var(--space-4);
+    color: var(--color-fg);
+    font-size: 1.0625rem;
+  }
+
+  .hero__intro :global(p) + :global(p) {
+    margin-block-start: var(--space-3);
+  }
+
+  .hero__intro :global(a) {
+    text-underline-offset: 0.18em;
+  }
+</style>

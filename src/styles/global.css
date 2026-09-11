@@ -1,0 +1,582 @@
+/*
+ * Global stylesheet: reset, base typography, and the `.prose` rules that
+ * rendered markdown post bodies fall into.
+ *
+ * Component-specific styling lives in each .astro file's scoped <style> block.
+ * Post bodies are slotted markdown, so their styles cannot be scoped — they
+ * live here under `.prose`.
+ *
+ * No literal colours in this file. See tokens.css.
+ */
+
+@import "./tokens.css";
+
+/* ------------------------------------------------------------------ reset */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ol,
+ul,
+pre {
+  margin: 0;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---- heading scale ----
+   Applies to bare semantic HTML, so a page that just writes <h1> looks right
+   without reaching for a class. `.prose` and components layer on top. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 650;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 1.35rem + 1.7vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: 1.4rem;
+}
+
+h3 {
+  font-size: 1.175rem;
+}
+
+h4 {
+  font-size: 1.0375rem;
+}
+
+h5,
+h6 {
+  font-size: 1rem;
+}
+
+/* ------------------------------------------------------------------- base */
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: var(--leading-body);
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (min-width: 48rem) {
+  body {
+    font-size: 1.125rem;
+  }
+}
+
+/* Anything long and unbreakable (URLs, resource ids) wraps rather than
+   widening the page. Horizontal scroll belongs to code blocks and tables. */
+p,
+li,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+figcaption {
+  overflow-wrap: break-word;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--color-accent-strong);
+}
+
+strong,
+b {
+  font-weight: 650;
+}
+
+::selection {
+  background-color: var(--color-accent-soft);
+  color: var(--color-fg);
+}
+
+hr {
+  height: 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ------------------------------------------------------------------ focus */
+
+:focus-visible {
+  outline: var(--focus-ring) solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Scrollable code blocks and tables are made focusable by the enhancement
+   script in BaseLayout; keep their ring tight to the container edge. */
+.prose pre:focus-visible,
+.prose .table-scroll:focus-visible {
+  outline-offset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* -------------------------------------------------------------- structure */
+
+.container {
+  width: 100%;
+  max-width: var(--measure-wide);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+@media (min-width: 48rem) {
+  .container {
+    padding-inline: var(--space-5);
+  }
+}
+
+/* <main> grows so the footer sits at the bottom of short pages. */
+.page-main {
+  flex: 1 0 auto;
+  width: 100%;
+  padding-block: var(--space-6);
+}
+
+/* ---- default flow for unclassed page content ----
+   Routes render plain <h1>/<p>/<ul> straight into <main>. These rules give that
+   markup a readable rhythm and reading width with no classes required. */
+
+.page-main > h1 {
+  max-width: var(--measure);
+  margin-block-end: var(--space-3);
+}
+
+.page-main > h2,
+.page-main > h3 {
+  max-width: var(--measure);
+  margin-block-start: var(--space-5);
+  margin-block-end: var(--space-2);
+}
+
+.page-main > p,
+.page-main > ul,
+.page-main > ol,
+.page-main > dl {
+  max-width: var(--measure);
+  margin-block-end: var(--space-4);
+}
+
+.page-main > ul,
+.page-main > ol {
+  padding-inline-start: 1.5em;
+}
+
+/* A top-level list of tag pills (the /tags/ index) is a chip list, not a
+   bulleted list. Detected structurally so no route needs to pass a class. */
+.page-main > ul:has(> li > .tag-pill) {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
+.page-main > ul > li:has(> .tag-pill) {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.page-main > ul > li:has(> .tag-pill) + li {
+  margin-block-start: var(--space-2);
+}
+
+.page-main > ul > li:has(> .tag-pill) > span {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+/* ---- landing page: two feeds side by side ----
+   FeedSection's root carries `.feed-section`; when exactly two sit as direct
+   siblings in <main> (the landing page's shape — Hero, then two FeedSections)
+   they go side by side from 768px up and stack below it. No wrapper markup
+   needed in the page that assembles them. */
+.page-main:has(> .feed-section + .feed-section) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+@media (min-width: 48rem) {
+  .page-main:has(> .feed-section + .feed-section) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  /* The hero masthead (if present) spans both columns, above the two feeds. */
+  .page-main:has(> .feed-section + .feed-section) > .hero {
+    grid-column: 1 / -1;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  z-index: 10;
+  top: var(--space-2);
+  left: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-surface);
+  color: var(--color-fg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  transform: translateY(calc(-100% - var(--space-4)));
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* Visually hidden but available to assistive tech. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------------------------------------------ prose */
+/* Rendered markdown. Everything is constrained to --measure except code and
+   tables, which are allowed to fill the column and scroll inside themselves. */
+
+/* Text is held at --measure for legibility, but code blocks and tables get the
+   full --measure-figure column: on a code-heavy post the extra width is the
+   difference between reading a command and scrolling it. */
+.prose {
+  /* min-width:0 so the column may shrink below the min-content width of a wide
+     code block or table; those scroll inside themselves instead. */
+  min-width: 0;
+  max-width: var(--measure-figure);
+}
+
+.prose > * {
+  max-width: var(--measure);
+}
+
+.prose > pre,
+.prose > table,
+.prose > .table-scroll,
+.prose > figure,
+.prose > img {
+  max-width: 100%;
+}
+
+.prose > * + * {
+  margin-block-start: var(--space-4);
+}
+
+/* Size and weight come from the base heading scale; these rules add only what
+   is specific to a long post body. Jump targets must clear the viewport edge. */
+.prose :is(h2, h3, h4, h5, h6) {
+  scroll-margin-top: var(--space-4);
+}
+
+/* A hairline above each h2 gives long posts visible section boundaries
+   without decoration. */
+.prose > h2 {
+  margin-block-start: var(--space-6);
+  padding-block-start: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.prose > h3 {
+  margin-block-start: var(--space-5);
+}
+
+/* h4 is a label inside a section, not another size step. */
+.prose > h4 {
+  margin-block-start: var(--space-5);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.prose > h5,
+.prose > h6 {
+  margin-block-start: var(--space-4);
+}
+
+.prose ul,
+.prose ol {
+  padding-inline-start: 1.5em;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li + li {
+  margin-block-start: var(--space-2);
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin-block-start: var(--space-2);
+}
+
+.prose li::marker {
+  color: var(--color-muted);
+}
+
+.prose dt {
+  font-weight: 650;
+}
+
+.prose dd {
+  margin-inline-start: var(--space-4);
+}
+
+.prose blockquote {
+  padding-inline-start: var(--space-4);
+  border-inline-start: 3px solid var(--color-border);
+  color: var(--color-muted);
+}
+
+.prose blockquote > * + * {
+  margin-block-start: var(--space-3);
+}
+
+.prose figure > figcaption,
+.prose figcaption {
+  margin-block-start: var(--space-2);
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.prose hr {
+  margin-block: var(--space-6);
+}
+
+.prose img {
+  border-radius: var(--radius);
+}
+
+/* ---- inline code ---- */
+
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: 0.12em 0.34em;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  /* An `az` command or resource id inline must break, not push the page out. */
+  overflow-wrap: anywhere;
+}
+
+.prose a > code {
+  color: inherit;
+}
+
+/* ---- fenced code blocks (Shiki: <pre class="astro-code">) ---- */
+/* Shiki writes its own foreground/background as inline styles. Only the
+   container is themed here — the palette inside the block is Shiki's. */
+
+.prose pre {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  tab-size: 2;
+}
+
+.prose pre code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  font-family: var(--font-mono);
+  font-size: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  white-space: pre;
+}
+
+/* Shiki dual theme: Astro emits the light palette inline and the dark palette
+   as --shiki-dark* custom properties. !important is required because it must
+   beat a style attribute. Scoped to prefers-color-scheme to match tokens.css:54. */
+@media (prefers-color-scheme: dark) {
+  .prose pre.astro-code {
+    background-color: var(--shiki-dark-bg) !important;
+  }
+  .prose pre.astro-code,
+  .prose pre.astro-code span {
+    color: var(--shiki-dark) !important;
+  }
+}
+
+/* ---- tables ---- */
+/* Two paths, because markdown emits a bare <table> with no wrapper:
+   1. no JS  — the table itself is the scroll container (display:block);
+   2. JS     — BaseLayout wraps it in .table-scroll, which becomes a
+               focusable region, and the table returns to real table layout. */
+
+.prose table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border-collapse: collapse;
+  border: 1px solid var(--color-border);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.prose .table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.prose .table-scroll > table {
+  display: table;
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+  overflow: visible;
+  border: 0;
+}
+
+.prose th,
+.prose td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  border-inline-end: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.prose th:last-child,
+.prose td:last-child {
+  border-inline-end: 0;
+}
+
+.prose tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.prose thead th {
+  background-color: var(--color-surface);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.prose caption {
+  margin-block-end: var(--space-2);
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  text-align: start;
+}
+
+/* ------------------------------------------------------------------ print */
+
+@media print {
+  .skip-link,
+  .site-header,
+  .site-footer,
+  .toc {
+    display: none !important;
+  }
+
+  .prose pre,
+  .prose table {
+    overflow: visible;
+    white-space: pre-wrap;
+  }
+}

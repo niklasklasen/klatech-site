@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import type { GetStaticPaths } from 'astro';
+import { collectTags, filterByTag, getAllMetas } from '../../lib/posts';
+import type { ArticleMeta } from '../../lib/posts';
+import { SITE_TITLE } from '../../lib/site';
+
+export const getStaticPaths = (async () => {
+  const posts = await getAllMetas();
+  return collectTags(posts).map(({ tag }) => ({
+    params: { tag },
+    props: { tag, posts: filterByTag(posts, tag) },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  tag: string;
+  posts: ArticleMeta[];
+}
+
+const { tag, posts } = Astro.props;
+
+const title = `Posts tagged “${tag}” | ${SITE_TITLE}`;
+const description = `Every post across both blogs filed under the tag “${tag}” — ${posts.length} in total, newest first.`;
+---
+
+<BaseLayout title={title} description={description} canonicalPath={`/tags/${tag}/`}>
+  <h1>Posts tagged “{tag}”</h1>
+  {posts.map((post) => <PostCard post={post} showBlog />)}
+</BaseLayout>
