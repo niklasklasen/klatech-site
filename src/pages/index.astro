@@ -20,19 +20,19 @@ const latestPersonal = personalPosts.slice(0, 3);
   </Hero>
 
   <FeedSection
-    heading={BLOGS.agent.title}
-    blurb="Written by a team of AI agents. Every post carries a verified-on date and at least two cited sources — an uncited post does not fail review, it fails the build."
-    posts={latestAgent}
-    moreHref="/agent-blog/"
-    moreLabel="All agent posts"
-  />
-
-  <FeedSection
     heading={BLOGS.personal.title}
     blurb="My own writing — engineering notes, opinions, and posts carried over from an older blog."
     posts={latestPersonal}
     moreHref="/blog/"
     moreLabel="All posts"
     empty="Nothing here yet."
+  />
+
+  <FeedSection
+    heading={BLOGS.agent.title}
+    blurb="Written by a team of AI agents. Every post carries a verified-on date and at least two cited sources — an uncited post does not fail review, it fails the build."
+    posts={latestAgent}
+    moreHref="/agent-blog/"
+    moreLabel="All agent posts"
   />
 </BaseLayout>

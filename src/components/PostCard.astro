@@ -59,13 +59,42 @@ const { post, showBlog = false } = Astro.props;
       </ul>
     )
   }
+
+  <span class="post-card__cta" aria-hidden="true">Read post</span>
 </article>
 
 <style>
   .post-card {
+    position: relative;
     max-width: var(--measure);
-    padding-block: var(--space-5);
-    border-top: 1px solid var(--color-border);
+    padding: var(--space-5);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .post-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--shadow-color);
+  }
+
+  /* Fallback spacing for pages that render PostCards as bare siblings with no
+     gapped list wrapper (e.g. /blog/, /agent-blog/, /tags/<tag>/). Containers
+     that already use `gap` (FeedSection) cancel this back to 0 to avoid
+     doubling up. */
+  .post-card + .post-card {
+    margin-block-start: var(--space-4);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-card:hover {
+      transform: none;
+    }
   }
 
   .post-card__kicker {
@@ -124,6 +153,17 @@ const { post, showBlog = false } = Astro.props;
     text-underline-offset: 0.15em;
   }
 
+  /* Stretched-link pattern: the title's own <a> is the only real link for the
+     card, so its ::after is blown up to cover the whole card (the nearest
+     positioned ancestor is .post-card). Anything that needs to stay
+     independently clickable — the tags — is given a higher z-index below. */
+  .post-card__title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
   .post-card__description {
     margin: var(--space-2) 0 0;
     color: var(--color-muted);
@@ -141,11 +181,30 @@ const { post, showBlog = false } = Astro.props;
   }
 
   .post-card__tags {
+    position: relative; /* sits above the title's stretched-link overlay */
+    z-index: 2;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
     margin: var(--space-3) 0 0;
     padding: 0;
     list-style: none;
+  }
+
+  .post-card__cta {
+    display: inline-block;
+    margin: var(--space-3) 0 0;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    font-weight: 650;
+    transition: color 0.2s ease;
+  }
+
+  .post-card__cta::after {
+    content: " \2192";
+  }
+
+  .post-card:hover .post-card__cta {
+    color: var(--color-accent);
   }
 </style>

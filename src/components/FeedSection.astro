@@ -63,13 +63,16 @@ const headingId = `feed-${heading
   }
 
   .feed-section__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
     margin-block-start: var(--space-2);
   }
 
-  /* First card's own top border is redundant right under the heading. */
-  .feed-section__list > :global(.post-card:first-child) {
-    border-top: 0;
-    padding-block-start: var(--space-3);
+  /* PostCard's own adjacent-sibling margin is a fallback for contexts with no
+     gapped wrapper; this container already provides the gap, so cancel it. */
+  .feed-section__list :global(.post-card + .post-card) {
+    margin-block-start: 0;
   }
 
   .feed-section__empty {

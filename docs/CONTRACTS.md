@@ -379,5 +379,12 @@ anything else — is a contract violation. QA asserts that `dist/` contains no
 shape is fixed here, in this order:
 
 ```
-Home /   ·   Agent Blog /agent-blog/   ·   Blog /blog/   ·   Tags /tags/   ·   About /about/
+Home /   ·   Blog /blog/   ·   Agent Blog /agent-blog/   ·   Tags /tags/   ·   About /about/
 ```
+
+> **Amendment 2026-09-14 (@lead):** the owner asked to lead with his own blog rather
+> than the agent blog, on both the landing page and the header nav. The landing page's
+> `FeedSection` order was already swapped in `src/pages/index.astro`; this amendment
+> brings `NAV_LINKS` in line so the two do not disagree about which blog comes first.
+> The previous order (Agent Blog before Blog) is superseded, not merely undone by the
+> code — the fixed order above is now Home · Blog · Agent Blog · Tags · About.

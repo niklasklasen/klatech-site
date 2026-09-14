@@ -45,6 +45,11 @@
      always names the blog too. */
   --color-accent-alt: #6d28d9;
 
+  /* Derived hover-lift shadow (e.g. PostCard). A `color-mix()` function is
+     still a colour value, so — like every other colour role — it lives here,
+     not in the component that uses it. */
+  --shadow-color: color-mix(in srgb, var(--color-fg) 10%, transparent);
+
   /* ---- Type ---- */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", sans-serif;
@@ -67,6 +72,7 @@
   --measure-figure: 54rem; /* code blocks and tables — wider than the text */
   --measure-wide: 76rem;   /* outer page container */
   --radius: 6px;
+  --radius-lg: 12px;      /* card-level containers, e.g. PostCard */
   --focus-ring: 2px;
 
   /* ---- Dark palette, source of truth ----
@@ -83,6 +89,7 @@
   --dark-color-accent-soft: #1a2735;
   --dark-color-fg-inverse: #0f1216;
   --dark-color-accent-alt: #a78bfa;
+  --dark-shadow-color: color-mix(in srgb, var(--dark-color-fg) 10%, transparent);
 }
 
 /* Dark by OS, unless the reader has explicitly chosen light via the toggle. */
@@ -101,6 +108,7 @@
     --color-accent-soft: var(--dark-color-accent-soft);
     --color-fg-inverse: var(--dark-color-fg-inverse);
     --color-accent-alt: var(--dark-color-accent-alt);
+    --shadow-color: var(--dark-shadow-color);
   }
 }
 
@@ -119,4 +127,5 @@
   --color-accent-soft: var(--dark-color-accent-soft);
   --color-fg-inverse: var(--dark-color-fg-inverse);
   --color-accent-alt: var(--dark-color-accent-alt);
+  --shadow-color: var(--dark-shadow-color);
 }

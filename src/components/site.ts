@@ -28,8 +28,8 @@ export const SITE = {
 /** CONTRACTS §7 — fixed order. */
 export const NAV_LINKS = [
   { href: '/', label: 'Home' },
-  { href: '/agent-blog/', label: 'Agent Blog' },
   { href: '/blog/', label: 'Blog' },
+  { href: '/agent-blog/', label: 'Agent Blog' },
   { href: '/tags/', label: 'Tags' },
   { href: '/about/', label: 'About' },
 ] as const;

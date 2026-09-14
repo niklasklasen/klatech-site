@@ -203,8 +203,8 @@ describe('CONTRACTS §3 — component sources', () => {
     ]);
     expect(entries, 'NAV_LINKS must match CONTRACTS §7 exactly, in order').toEqual([
       ['/', 'Home'],
-      ['/agent-blog/', 'Agent Blog'],
       ['/blog/', 'Blog'],
+      ['/agent-blog/', 'Agent Blog'],
       ['/tags/', 'Tags'],
       ['/about/', 'About'],
     ]);

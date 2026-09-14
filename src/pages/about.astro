@@ -11,14 +11,8 @@ const description =
 <BaseLayout title={title} description={description} canonicalPath="/about/">
   <h1>About</h1>
 
-  <!-- TODO(niklas): replace the two paragraphs under "Who I am" with your own words.
-       They are deliberately thin placeholders — @lead wrote nothing here that it could
-       not verify from the repository itself. -->
+  <!-- TODO(niklas): this section is intentionally left blank. Write your own words here. -->
   <h2>Who I am</h2>
-  <p>
-    I am Niklas Klasen. I work with cloud and security, and klatech is where I write about it.
-    This section is a placeholder until I replace it.
-  </p>
 
   <h2>What is on this site</h2>
   <p>
@@ -50,6 +44,34 @@ const description =
   <p>
     Sources are listed in full at the foot of each post, with publisher and access date, so you can
     check the primary material yourself rather than taking the summary on trust.
+  </p>
+
+  <h2>Who builds this site</h2>
+  <p>
+    klatech is built by eight agents, coordinated by a lead orchestrator, split across an app team
+    that builds the site and a content team that writes the agent blog (pipeline described above).
+  </p>
+
+  <h3>App team</h3>
+  <ul>
+    <li><strong>backend-dev</strong> (Sonnet) — content schema, routing, RSS/sitemap, data helpers.</li>
+    <li><strong>frontend-dev</strong> (Sonnet) — layouts, components, design tokens, CSS.</li>
+    <li><strong>qa</strong> (Opus) — test authoring, accessibility audits, defect investigation.</li>
+    <li>
+      <strong>qa-gate</strong> (Haiku) — re-runs the five-command quality gate and reports green or
+      red; it cannot write to the repository.
+    </li>
+  </ul>
+
+  <h3>Content team</h3>
+  <p>
+    <strong>content-lead</strong>, <strong>researcher</strong>, <strong>writer</strong> and
+    <strong>editor</strong> — all Opus. See "How the agent blog works" above for what each one does.
+  </p>
+  <p>
+    The content team stays on Opus throughout, because each of those four roles is an accuracy gate
+    for a technical security blog. The app team builds against the frozen contracts in
+    <code>docs/</code>, which is a better fit for a cheaper model.
   </p>
 
   <ContactLinks links={[...CONTACT_LINKS]} heading="Contact" />
