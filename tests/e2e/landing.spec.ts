@@ -10,7 +10,7 @@ import { VIEWPORTS } from './pages';
  * than being folded into the generic per-page loop in runtime.spec.ts.
  */
 
-const HEADINGS = ['Agent Blog', 'Blog'];
+const HEADINGS = ['Blog', 'Agent Blog'];
 
 test.describe('/', () => {
   test('has exactly one h1, and it is the site name', async ({ page }) => {
