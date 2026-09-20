@@ -18,7 +18,7 @@ The reality is that to reach the point where you can manage your infrastructure 
 
 But this raised a question for me. When it comes to both deploy a new network infrastructure and manage it, can I still rely Bicep to do the trick or is Terraform better in this scenario? This is what I will try to figure out in this blog post. 
 
-# The test
+## The test
 In reality the entire core network in Azure will be effected by this, but to test the IaC language I'll keep it simple. I'll be using Azure Virtual Network Manager (AVNM) as the base resource here, and within that I'll create 2 network groups. Outside of the template I'll create 2 virtual networks and the the test will then be to:
 - Add one virtual network in each of the network groups
 - Move one virtual network form one network group to the other
@@ -28,43 +28,43 @@ In reality the entire core network in Azure will be effected by this, but to tes
 
 > DISCLAIMER: These template doesn't follow any good template structure. They only serve the purpose to conduct these tests.
 
-## Test 1 - creating AVNM and adding virtual networks to network groups
+### Test 1 - creating AVNM and adding virtual networks to network groups
 For this first step I created the AVNM using an IaC template and created the two network groups. The template will then add the two existing virtual networks to the network groups, one for each network group. 
-### Terraform
+#### Terraform
 Running this test in Terraform was no problem. AVNM and the network groups was created and one virtual network was added to each of the groups. As expected.
 
 ![](/images/blog/tf-2vnet-2networkgroup.png)
 
-### Bicep
+#### Bicep
 Same as for Terraform there were no issues to create an AVNM with two network groups and add existing virtual networks to them. 
 
 ![](/images/blog/bicep-2vnet-2networkgroup.png)
 
-## Test 2 - Move one virtual network from one network group to the other.
+### Test 2 - Move one virtual network from one network group to the other.
 By changing the parent for the virtual network "vnet-2" to reference the network group 1, this should move the virtual network from network group 2 to network group 1.
-### Terraform
+#### Terraform
 By changing the parent id for the static member, terraform destroys the existing static member resource and recreates it under the new parent. The result is that the vnet is moved to the other network group. 
 
 ![](/images/blog/tf-2vnet-1networkgroup.png)
 
-### Bicep
+#### Bicep
 By just changing the parent for the static member resource that is referencing "vnet-2", Bicep doesn't move that member. It creates a new static member in the new network group, resulting in network group 1 now has two members and one is still left in network group 2. This now means that the template is drifting from reality.
 
 ![](/images/blog/bicep-2vnet-1networkgroup.png)
 
-## Test 3 - Remove the virtual network from a network group
+### Test 3 - Remove the virtual network from a network group
 In this test I will simply remove the static member resource from the template and the expectation is that the network group loses the member.
-### Terraform
+#### Terraform
 With Terraform just removing the reference to the static member removes the member virtual network from the network group.
 
 ![](/images/blog/tf-1vnet-1networkgroup.png)
 
-### Bicep 
+#### Bicep 
 By removing the reference to the static member 2 in the template, the goal was to remove it from the network groups all together and just keep the static member 1 in network group 1. But since there is no state kept in bicep, just removing the reference from the template results in Bicep ignoring that resource. The environment stays the same as after test 2.
 
 ![](/images/blog/bicep-2vnet-1networkgroup.png)
 
-# Conclusion 
+## Conclusion 
 The purpose for this test was to figure out what IaC language would be best suited not for just building a core network in Azure, but to also manage the operations for that core network purely with the IaC template. The goal is that the core network only can be manipulated through these templates and not by human interactions through the Azure portal, AzureCLI or PowerShell. 
 
 Bicep is in my opinion a simpler language to use, and if your goal is just to deploy new infrastructure through templates, it's easy. You write a template and what you have in that template is what will be added to the environment. 
@@ -74,8 +74,8 @@ With Terraform you get the benefit (and hassle) of a state file, but you need to
 For my purpose of managing the core network only from the template, Terraform is the preferred choice. I also get the benefit of Terraform reverting any changes done in the portal if I redeploy my template. From a security perspective that means that I in theory can run a pipeline every night that deploys the Terraform template. If there's no changes in either the template or the environment, nothing will happen. But if someone has made unexpected changes in the environment, Terraform will roll it back to my expected state that is referenced in the state file. 
 
 
-## Appendix - Test 1 templates
-### Terraform
+### Appendix - Test 1 templates
+#### Terraform
 ```json
 terraform {
   required_providers {
@@ -194,7 +194,7 @@ resource "azapi_resource" "staticMember-2" {
   response_export_values    = ["*"]
 }
 ```
-### Bicep
+#### Bicep
 ```powershell
 targetScope = 'resourceGroup'
 

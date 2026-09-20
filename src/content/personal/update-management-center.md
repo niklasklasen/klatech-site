@@ -9,7 +9,7 @@ draft: false
 As long as we use virtual machines patch management will always be something that we need to be on top of. I recently came a cross a case where a customer wanted to update the way they managed patching for their virtual machines, both in Azure and on-prem. This led me to try out the service Update Management Center (Preview). One thing that caught my attention right of the bat was the possibility to manage patching through the use of Azure Policies. That is a big upside since utilizing a policy driven framework to govern Azure resources eases the administrative burden of IT departments and makes sure that you are compliant towards your own governance framework.
 So what is Update Management Center (Preview) and how do you get started with it? 
 
-# Update Management Center (Preview)
+## Update Management Center (Preview)
 One key difference from Automation Update Management, the current update management service in Azure, is that you no longer need Azure Automation or Azure Monitor Logs. Update Management Center (Preview) instead relies on an extension that interacts with the operating system to provide the functionality it need to assess and preform updates to your virtual machines. This extension is automatically installed on the virtual machine when an operation is initiated from Update Management Center (Preview), for example check for updates, install one-time update or periodic assessment on the virtual machine. The extension is install by using one of the following agents: 
 - Azure virtual machine Windows agent
 - Azure virtual machine Linux agent
@@ -25,7 +25,7 @@ Since the Update Management Center (Preview) extension is looking at the servers
 - *.dl.delivery.mp.microsoft.com
 - *.delivery.mp.microsoft.com
 
-# Limitations
+## Limitations
 There are some limitations for Update Management Center (Preview). The service doesn't support driver updates and for Azure virtual machines Update Management Center (Preview) is available in all regions that supports Compute Virtual Machines. But for Azure Arc-enabled servers it's only supported in the following regions:
 - South East Asia
 - Australia East
@@ -46,7 +46,7 @@ There are some limitations for Update Management Center (Preview). The service d
 - West US 2
 - West US 3
 
-# Deploying with Azure Policies
+## Deploying with Azure Policies
 You can find four built-in policies in the category Update Management Center that can be used to manage your patching aligned with a policy driven governance framework. One of these policies is used to enable periodic checks for updates on your Azure virtual machines and Azure Arc-enabled servers. When activated the assessment that Update Management Center (Preview) runs to find missing updates is performed with a 24-hour interval. Another policy is used to schedule recurring updates. These updates are based on the assessment that finds missing updates on your server and the categories that you chose to include in the schedule. 
 
 ![](/images/blog/umc-policies.png)

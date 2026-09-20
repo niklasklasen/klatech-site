@@ -13,7 +13,7 @@ There are many reasons for why an applications needs to be in the Online archety
 
 But being in the Online section of the Azure environment means that you can't take advantage of centrally managed shared services that are reached via the hub. One of them could be a centrally managed Web Application Firewall (WAF), and that will be the example in this post. The WAF can be complex to manage and needs configuration to make sure that its protecting the published applications. The WAF also comes with a cost. If we let the teams in the Online archetype managed this completely by them self we might end up with WAFs that are misconfigured and doesn't provide the protection that we want, or that teams publish the service directly to internet, relying only on the services level firewall on the PaaS service itself. 
 
-# Concept 1: Shared Platform Landing Zones for Online
+## Concept 1: Shared Platform Landing Zones for Online
 ![](/images/blog/solution1-online-shared.drawio.svg)
 
 In this concept we have deployed a WAF that will only serve applications that are in the Online archetype. This WAF will still be managed by the same team or individuals that are responsible for the WAF that is attached to the central connectivity hub. This means that we will have control over the configurations in the WAF that are used by applications in in the Online archetype. So we can ensure that they follow the desired rules and have control how the applications are exposed to the internet and how the communication between WAF and applications is configured. 
@@ -26,7 +26,7 @@ But if we are to use shared services in this way for our Online archetype we nee
 
 Note that you might need to deploy multiple WAFs for your online applications since you want them to be close to the resource in Azure and your applications user.
 
-#  Concept 2: Connect Online Applications the Corp Shared Platform Landing Zones
+##  Concept 2: Connect Online Applications the Corp Shared Platform Landing Zones
 ![](/images/blog/solution2-online-to-corp-shared.drawio.svg)
 
 For the second concept we utilize a WAF that is connected to the connectivity hub to publish our Online applications. Usually this WAF is dedicated to Corp applications but I want to challenge that in this concept. You will still get separation between Online and Corp applications in this scenario since the traffic can't traverse from an Online applications virtual network, through the WAF virtual network and on to the Corp applications. You get the same upsides as you do with the first concept with the addition that you will also save som mony since only one WAF is needed to serve both archetypes and your network team only needs to manage one WAF.
@@ -35,10 +35,10 @@ But what are the downsides? Even if the traffic from the Online applications can
 
 Since the Online applications and the Corp applications share the same WAF they will have to abide to the same security standard. That sure sounds like a good thing, but if you have different requirements to the different archetypes that will cause an issue. 
 
-# Conclusions
+## Conclusions
 For bigger companies where IP exhaustion is a real risk, the first concept the best for running shared Platform Landing Zones for Online applications. It will increase the cost and management.
 And for the second concept it is the other way around. I will be better suited for smaller companies where IP exhaustion is not an issue but cost and management capacity is. 
 Keep in mind that in neither of these concepts the online applications traffic is filtered through a firewall. 
 
-# Reflection
+## Reflection
 For security reasons I personally prefer that you try to run as much as possible through private networks in Azure. That might limit the need for solutions like this. But reality is that not all applications can be restricted to the rules that applies to Corp applications and there for needs to be classified as an Online applications. The goal with these to concepts are to make the Online applications as secure as possible.

@@ -7,7 +7,7 @@ tags:
 draft: false
 ---
 ![](/images/blog/aumIcon.png)
-# Azure Update Manager is generally available
+## Azure Update Manager is generally available
 It's been half a year since I wrote my first post for this blog about the product Update Management Center which was in preview back then. A couple of days ago Microsoft released the product as Generally Available under the name "Azure Update Manager", read more in the release post on Microsoft Techcommunity [Microsoft Techcommunity](https://techcommunity.microsoft.com/t5/azure-governance-and-management/generally-available-azure-update-manager/ba-p/3928878?WT.mc_id=DT-MVP-5001664). The release post mentions the new price for Azure Update Manager now when it moves into Generally Availability without going in to any more details than Azure or Azure Stack HCI hosted Virtual Machines will remain free, and Azure Arc-enabled servers will cost up to $5/month per server. So let’s shed some light on that. 
 
 The cost is based on the amount of days that the Arc-enabled server is considered as managed by Azure Update Manager, and a server is considered as managed if the following two conditions are met:
@@ -20,7 +20,7 @@ If you buy Extended Security Updates (ESUs) for your Arc-enabled servers, manage
 
 ![](/images/blog/azureUpdateManagerOverview.png)
 
-# Dynamic Scopes
+## Dynamic Scopes
 A key resource to get the patches installed on your servers using Azure Update Manager is the Maintenance Configuration. I have explained more on how to create Maintenance Configurations on a previous blog post, so I won’t go into details on that. If you would like to read more on creating Maintenance Configurations read this post instead [Configuring Update Management Center (Preview) with policies](https://klasen.cloud/azure/update-management-center/).
 
 For automatic onboarding of servers to Maintenance Configurations I used Azure policies and defined what parameters I needed for specific schedules. If an organization had multiple windows and a global presence, there could be a lot of policies to deploy. In my opinion that leads to a very cluttered compliance view when looking at your policies. Luckily there is a feature in preview called Dynamic Scopes. This replaces the need for policies to dynamically onboard servers to a Maintenance Configuration. 

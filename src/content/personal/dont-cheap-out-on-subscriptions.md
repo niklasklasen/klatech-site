@@ -19,12 +19,12 @@ Frist of there are a few limits to know when we are working with management grou
 
 ![](/images/blog/ESL-limits.png)
 
-# Management Groups
+## Management Groups
 Management groups are used to hierarchy and areas in the way we apply our governance framework. Everything you assign to a management group, whether it's policies or RBAC role assignments they will be inherited vertically down in the structure. They do not inherit horizontal in the structure. As an example, a RBAC role assignment added to the management group "Platform" will be inherited to the management groups "Identity", "Management" and "Connectivity" and all the subscriptions that resides within them. How ever it will not be applied to the management group "Landing Zones". 
 
 The structure presented in the Enterprise Scale Landing Zone architecture is designed to scale with you throughout your cloud journey. Think both one and two times before changing or adding two much to the design. I have seen cases where management groups are created to mimic the company’s organizational structure or their country-based footprint, that solution tends to run in to a scaling problem at some point. The guardrails that we set up with Azure Policies will in most cases span over multiple teams and countries since they are focused on what resource you are allowed to deploy or how the must be configured. If you take an application that is intended to be connected to your central connectivity HUB, it doesn’t matter what country the users are in. We must enforce our policies that applies for applications that want to access our internal network. 
 
-# Subscriptions
+## Subscriptions
 Don't hold back when the organization ask for new subscriptions to build their applications in. If you have your management groups in order and the Azure Polices in place, adding extra subscriptions won't be a burden for you. Rather see them as container where your developers or other users can develop and try out new things. If the thing that they tried out works you already have it in a separate container that is organized with the correct governance rules, and it's a product that doesn’t work you can just decommission the whole subscription.
 
 Be very cautious when handing out the RBAC role "Owner", even on subscriptions. As an Owner you can migrate the Subscription to another Tenant. The effect would for your organization will be that you are still carrying the cost for this Subscription, but you won't be able to see it. Even wors, all the guardrails you implemented with RBAC and Azure Policies will not affect the Subscription once it's moved out
@@ -35,7 +35,7 @@ As of today, you can give an application team the RBAC role Contributor without 
 
 ![](/images/blog/ESL-MS.svg)
 
-# Platform Landing Zones vs. Application Landing Zones
+## Platform Landing Zones vs. Application Landing Zones
 In the Platform Landing Zone subscriptions, we deploy workloads or applications that provides a shared service for the applications in the Application Landing Zones. In the Enterprise Scale Landing Zone concept, we start with 3 Platform Landing Zone subscriptions, Connectivity, Identity and Management. Here are some examples for what each of them can host:
 - **Connectivity** - This will be your central connectivity hub. This is where all the Corp Application Landing Zones are peered together and where your Azure environment is connected to your on-premises datacenters. 
 - **Management** - Here deploy Platform Landing Zones for patch management and/or central logging. 
